@@ -4,8 +4,8 @@
     "dockerfile": "../../.devcontainer-base/Dockerfile",
     "context": "../../.devcontainer-base"
   },
-  "workspaceFolder": "/workspaces/02_prompt_progression",
-  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/02_prompt_progression,type=bind,consistency=cached",
+  "workspaceFolder": "/workspaces/07_skills",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/07_skills,type=bind,consistency=cached",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -18,7 +18,7 @@
   "mounts": [],
   "runArgs": [
     "--hostname",
-    "demo-02-prompt-progression",
+    "demo-07-skills",
     "--env-file",
     "${localWorkspaceFolder}/../.env"
   ]

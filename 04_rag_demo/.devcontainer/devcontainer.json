@@ -4,8 +4,8 @@
     "dockerfile": "../../.devcontainer-base/Dockerfile",
     "context": "../../.devcontainer-base"
   },
-  "workspaceFolder": "/workspaces/02_prompt_progression",
-  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/02_prompt_progression,type=bind,consistency=cached",
+  "workspaceFolder": "/workspaces/04_rag_demo",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/04_rag_demo,type=bind,consistency=cached",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -19,7 +19,7 @@
   "mounts": [],
   "runArgs": [
     "--hostname",
-    "demo-02-prompt-progression",
+    "demo-04-rag-demo",
     "--env-file",
     "${localWorkspaceFolder}/../.env"
   ],
