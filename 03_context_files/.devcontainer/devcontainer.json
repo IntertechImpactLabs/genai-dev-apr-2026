@@ -1,0 +1,22 @@
+{
+  "name": "D1: Tool Use Under the Hood",
+  "build": {
+    "dockerfile": "../../.devcontainer-base/Dockerfile",
+    "context": "../../.devcontainer-base"
+  },
+  "workspaceFolder": "/workspaces/02_prompt_progression",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/02_prompt_progression,type=bind,consistency=cached",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "humao.rest-client",
+        "dbaeumer.vscode-eslint"
+      ]
+    }
+  },
+  "mounts": [],
+  "runArgs": [
+    "--hostname", "demo-02-prompt-progression",
+    "--env-file", "${localWorkspaceFolder}/../.env"
+  ]
+}
