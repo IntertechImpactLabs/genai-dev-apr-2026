@@ -14,3 +14,6 @@ Content-Type: application/json
   "name": "Alice",
   "email": "alice@example.com"
 }
+
+### Health
+GET {{baseUrl}}/health
