@@ -1,0 +1,14 @@
+{
+  "name": "02_prompt_progression",
+  "version": "1.0.0",
+  "description": "Express API with SQLite database",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "init-db": "node src/init-db.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "sqlite3": "^5.1.7"
+  }
+}
