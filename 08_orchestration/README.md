@@ -4,25 +4,46 @@
 
 ## Purpose
 
-Show that complex tasks are handled by composing specialized agents. Watch orchestration happen naturally in a coding agent, then understand the architecture patterns (subagents, handoffs, pipelines).
+Show that complex tasks are handled by composing specialized agents. Claude Code's orchestrator delegates to custom subagents defined in `.claude/agents/`, each with a focused system prompt and scoped tool access.
 
 ## Structure
 
-Two parts:
-1. **Live demo (5 min):** Give Claude Code a multi-part task and narrate the delegation
-2. **Architecture (3 min):** Explain the three orchestration patterns with a diagram
+```
+.claude/
+  agents/
+    implementer.md     ← subagent: writes Express/TypeScript application code
+    test-writer.md     ← subagent: writes Jest/Supertest tests, runs them
+src/
+  app.ts               ← Express app entry point
+  db.ts                ← Postgres pool + connection helper
+  routes/
+    users.ts           ← existing user CRUD routes
+tests/
+  users.test.ts        ← existing tests (the "before" state)
+package.json
+tsconfig.json
+demo-script.md         ← step-by-step instructor script
+```
 
-## Files
-
-- `demo-script.md` — Step-by-step instructor script with talking points and architecture diagram
-- `fallback/` — Pre-captured session for when live demo is slow
-
-## The prompt
+## The demo prompt
 
 ```
-Add a health check endpoint to the Express app. It should check database connectivity 
-and return status information. Write the endpoint, add a test for it, and update the 
-README with the new endpoint documentation.
+Add a health check endpoint to the Express app at GET /health.
+
+It should return:
+- status: "ok"
+- uptime: seconds the server has been running
+- db: whether the database connection is healthy
+
+Write the endpoint in src/routes/health.ts and register it in src/app.ts.
+Then write tests for it in tests/health.test.ts.
 ```
 
-This naturally splits into code + test + docs, showing orchestration in action.
+This naturally triggers orchestration: the main agent delegates implementation to the `implementer` subagent and test writing to the `test-writer` subagent.
+
+## Key teaching points
+
+1. **Subagent configs** — `.claude/agents/*.md` files define name, description, tools, and system prompt
+2. **Description-based routing** — the orchestrator picks subagents based on their `description:` field
+3. **Tool scoping** — each agent only gets the tools its job requires
+4. **Focused context** — the test-writer never sees the implementer's context window, and vice versa

@@ -6,62 +6,83 @@
 
 Complex tasks are handled by composing specialized agents, not by making one agent do everything. This is the same pattern behind Copilot Coding Agent, Claude Code's subagents, and multi-agent frameworks.
 
-## Prerequisites
+## What's in this directory
 
-- Claude Code installed (subagent delegation is most visible here)
-- A project with multiple files to work with (the `06_refactoring/` project works well)
+```
+.claude/
+  agents/
+    implementer.md     ← subagent: writes Express/TypeScript code
+    test-writer.md     ← subagent: writes Jest/Supertest tests
+src/
+  app.ts               ← Express app (the codebase the agents work on)
+  db.ts                ← Postgres pool + connection check
+  routes/
+    users.ts           ← existing CRUD routes
+tests/
+  users.test.ts        ← existing tests
+```
 
-## Setup slide talking points
-
-> "We've connected agents to tools (MCP) and taught them skills. But real-world tasks often need multiple specialists. Writing code, running tests, updating docs — these are different jobs. Modern agents handle this by delegating to subagents."
-
-## Two-part demo
-
-This demo has two halves: first, watch orchestration happen naturally in a coding agent. Second, look at the architecture diagram to understand what happened under the hood.
+The agents are defined in `.claude/agents/`. Open one to show the class before the demo.
 
 ---
 
-## Part A: Watch subagent delegation (5 min)
+## Part A: Show the subagent configs (2 min)
+
+Open `.claude/agents/implementer.md` and `.claude/agents/test-writer.md`.
+
+**What to point out:**
+
+- The `description:` field is how Claude Code decides which subagent to use — it's read by the orchestrator at routing time
+- The `tools:` list scopes what each agent can do. The implementer has no `Bash` — it can't run code. The test-writer has `Bash` so it can run `npm test` and fix failures before returning.
+- The system prompt is the agent's identity. Each one says explicitly "do not do X — that is another agent's job"
+
+**What to say:**
+> "Two agents, two jobs. The implementer writes code. The test-writer writes tests. Neither one knows about the other — the orchestrator coordinates them. This is the same pattern behind every serious multi-agent system."
+
+---
+
+## Part B: Live demo (5 min)
+
+### Setup
+
+Make sure you're in this directory:
+```
+cd 08_orchestration
+```
 
 ### The prompt
 
-Give Claude Code a task that requires multiple distinct activities:
+Paste this into Claude Code:
 
 ```
-Add a health check endpoint to the Express app. It should check database connectivity 
-and return status information. Write the endpoint, add a test for it, and update the 
-README with the new endpoint documentation.
-```
+Add a health check endpoint to the Express app at GET /health.
 
-This naturally splits into three subtasks:
-1. Write the health check endpoint (code)
-2. Write a test (testing)
-3. Update README (documentation)
+It should return:
+- status: "ok"
+- uptime: seconds the server has been running
+- db: whether the database connection is healthy
+
+Write the endpoint in src/routes/health.ts and register it in src/app.ts.
+Then write tests for it in tests/health.test.ts.
+```
 
 ### What to watch for
 
-**In Claude Code** (which uses subagents visibly):
-- The main agent will plan the approach
-- It may spawn subagents for distinct tasks (visible as "Task" tool calls in verbose mode)
-- Each subtask runs independently with its own context
-- Results flow back to the parent agent
-
-**What to narrate:**
-
 | Phase | What you see | What to say |
 |-------|-------------|-------------|
-| Planning | Agent outlines the three subtasks | "The orchestrator is decomposing the task. Three jobs: code, test, docs." |
-| Delegation | Agent works on each subtask (or spawns subagents) | "Each subtask gets its own focused context. The agent working on tests doesn't need the README in its context window." |
-| Integration | Agent reviews all changes together | "The orchestrator checks that everything is consistent — the test covers the endpoint, the README matches the implementation." |
+| Planning | Orchestrator reads the existing code | "It's reading the codebase first — it won't write code it hasn't read." |
+| Delegation to implementer | `Task(implementer)` tool call appears | "There it is — the orchestrator delegating to a subagent. The implementer gets its own context, its own system prompt, only the tools it needs." |
+| Implementer works | It reads `src/app.ts`, writes `src/routes/health.ts`, edits `src/app.ts` | "The implementer is focused. It only writes code. It won't touch the tests." |
+| Delegation to test-writer | `Task(test-writer)` tool call appears | "Now the orchestrator hands off to the test-writer. Note: the test-writer reads the implementation first before writing a single test." |
+| Test-writer runs tests | `Bash(npm test)` appears | "The test-writer runs the tests itself and fixes failures before returning. The orchestrator gets back a green result." |
+| Integration | Orchestrator summarizes | "The orchestrator checks consistency and reports back. Three files changed, all coordinated." |
 
-**What to say after:**
-> "You just watched orchestration happen. One task, three specialists, coordinated by an orchestrator. In Claude Code this happens through subagent spawning. In Copilot it happens through agent mode's internal planning. The pattern is the same."
+### What to say after:
+> "You just watched orchestration. One prompt, two specialists, coordinated by an orchestrator. The test agent never saw the implementation agent's context. The orchestrator never wrote a single line of code or a single test."
 
 ---
 
-## Part B: Architecture diagram (3 min)
-
-Show this diagram on a slide or whiteboard:
+## Part C: Architecture (1 min)
 
 ```
                     ┌─────────────────┐
@@ -70,44 +91,29 @@ Show this diagram on a slide or whiteboard:
                     └───────┬─────────┘
                             │
               ┌─────────────┼─────────────┐
-              │             │             │
-        ┌─────▼─────┐ ┌────▼──────┐ ┌────▼──────┐
-        │  Code      │ │  Test     │ │  Docs     │
-        │  Agent     │ │  Agent    │ │  Agent    │
-        └─────┬─────┘ └────┬──────┘ └────┬──────┘
-              │             │             │
-        ┌─────▼─────┐ ┌────▼──────┐ ┌────▼──────┐
-        │  File      │ │  Test     │ │  File     │
-        │  System    │ │  Runner   │ │  System   │
-        │  (MCP)     │ │  (MCP)    │ │  (MCP)    │
-        └───────────┘ └───────────┘ └───────────┘
+              │                           │
+        ┌─────▼──────┐            ┌───────▼──────┐
+        │ implementer │            │  test-writer  │
+        │  subagent   │            │   subagent    │
+        └─────┬──────┘            └───────┬──────┘
+              │                           │
+        Read, Write,                Read, Write,
+        Edit, Glob,                 Edit, Bash
+        Grep                        (npm test)
 ```
 
-### What to explain
+**Key insight:**
+> "Each agent has a narrow job and only the tools it needs. The test-writer can run Bash. The implementer can't — it has no reason to. Scoping tools is how you prevent agents from doing things they shouldn't."
 
-**Three orchestration patterns:**
-
-1. **Subagents (agents-as-tools):** The orchestrator spawns specialized agents as tools. Each subagent has its own system prompt, tools, and context. This is what Claude Code does with its Task tool.
-
-2. **Handoffs:** One agent transfers the conversation to another agent with a different specialization. The receiving agent picks up where the previous one left off. Common in customer service bots and multi-step workflows.
-
-3. **Pipeline:** Agents run in sequence — the output of one feeds the input of the next. Common in content workflows (research → draft → review → publish).
-
-**What to say:**
-> "These three patterns cover most real-world orchestration. Subagents for parallel independent work. Handoffs for sequential specialization. Pipelines for staged workflows. When we build custom agents in the next section, you'll see how to implement the subagent pattern yourself."
-
-## Debrief (included in Part B)
-
-> "The key insight: you don't make one agent smarter by giving it more tools and more context. You make the system smarter by composing focused agents. Each agent has a narrow job, a focused context, and the right tools. The orchestrator coordinates. This is how every serious agent system works in 2026."
+---
 
 ## Fallback plan
 
-If the live demo is slow or the subagent behavior isn't clearly visible:
-- Switch to Part B immediately (the architecture diagram is the core teaching)
-- Use the pre-captured session in `fallback/` to narrate the delegation pattern
-- The teaching point lands from the diagram + explanation even without live demo
+If the live demo is slow or subagent delegation isn't clearly visible:
+- Show the two agent files and explain the `description:` routing mechanism (2 min)
+- Show `src/routes/users.ts` and `tests/users.test.ts` as the "before" state
+- Narrate what each agent would have done using the architecture diagram above
 
 ## Connection to D10 (Custom Agents)
 
-Transition with:
-> "You've now seen the full toolkit: MCP for tools, Skills for capabilities, orchestration for composition. In the next section, we'll build an agent from scratch — and you'll see that the same loop powering all of this is about 30 lines of code."
+> "You've now seen the full toolkit: MCP for tools, Skills for capabilities, orchestration for composition. In the next section, we'll build a custom agent from scratch — you'll see that the loop powering all of this is about 30 lines of code."
