@@ -14,13 +14,9 @@
       ]
     }
   },
-  "remoteEnv": {
-    "OPENAI_API_KEY": "${localEnv:OPENAI_API_KEY}",
-    "ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}"
-  },
   "mounts": [],
   "runArgs": [
-    "--hostname",
-    "demo-02-prompt-progression"
+    "--hostname", "demo-02-prompt-progression",
+    "--env-file", "${localWorkspaceFolder}/../.env"
   ]
 }
