@@ -9,7 +9,7 @@
 #   - OPENAI_API_KEY in .env file
 # ============================================================
 
-@openai-key={{$dotenv OPENAI_API_KEY}}
+@openai-key={{$processEnv OPENAI_API_KEY}}
 @model=gpt-5.4
 
 # ============================================================
