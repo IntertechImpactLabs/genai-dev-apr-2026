@@ -96,7 +96,38 @@ Custom Instructions (always active)
               └── Custom Agents (full autonomy)
 ```
 
-### Step 5: Debrief (2 min)
+### Step 5 (optional): env-doctor — script as diagnostic tool (3 min)
+
+**What to say:**
+> "Here's a second script-backed skill that shows a different use case. Instead of gathering data for the agent to reformat, this script runs a set of objective checks — and the agent's job is to triage and explain what they mean for a new developer."
+
+**Open** `.claude/skills/env-doctor/SKILL.md`
+
+**What to point out:**
+- The script outputs a status tag per line: `OK`, `MISSING`, `WARN`, `DEFAULT`
+- The skill instructs the agent to group findings by severity: Blocker, Warning, Advisory
+- The output ends with a numbered fix checklist — only the actions that are actually needed
+
+**Run it:**
+
+```
+Is my environment set up correctly?
+```
+
+**What the agent does:**
+1. Runs `scripts/check-env.sh` — gets a plain-text status report
+2. Identifies blockers (DATABASE_URL, JWT_SECRET) vs. safe defaults (PORT, NODE_ENV)
+3. Explains *why* each missing thing matters, not just *that* it's missing
+4. Produces a fix checklist ordered by priority
+
+**What to say:**
+> "A script can tell you DATABASE_URL is missing. It can't tell you that means every request will crash on the first DB call, or that the fix is to copy .env.example and run openssl rand. That's what the agent adds — interpretation, context, and a path forward."
+
+**If live demo isn't possible:** show `fallback/env-doctor-output.md` — the script output and the agent's diagnosis are both there.
+
+---
+
+### Step 6: Debrief (2 min)
 
 **What to say:**
 > "You just encoded tribal knowledge into something reusable. A new developer on the team gets the same review quality as your most experienced reviewer — because the checklist is the same. Skills are portable, versionable, and composable. You can have a review skill, a test scaffolding skill, a migration skill — whatever patterns your team repeats."
