@@ -1,4 +1,4 @@
-### Test successful user creation
+###
 POST http://localhost:3000/api/users
 Content-Type: application/json
 
@@ -7,65 +7,12 @@ Content-Type: application/json
   "email": "charlie@example.com"
 }
 
-### Test missing name
+###
 POST http://localhost:3000/api/users
 Content-Type: application/json
 
 {
   "email": "test@example.com"
-}
-
-### Test empty name (should validate)
-POST http://localhost:3000/api/users
-Content-Type: application/json
-
-{
-  "name": "   ",
-  "email": "test@example.com"
-}
-
-### Test name not a string
-POST http://localhost:3000/api/users
-Content-Type: application/json
-
-{
-  "name": 123,
-  "email": "test@example.com"
-}
-
-### Test missing email
-POST http://localhost:3000/api/users
-Content-Type: application/json
-
-{
-  "name": "Test User"
-}
-
-### Test invalid email format
-POST http://localhost:3000/api/users
-Content-Type: application/json
-
-{
-  "name": "Test User",
-  "email": "not-an-email"
-}
-
-### Test duplicate email (alice already exists)
-POST http://localhost:3000/api/users
-Content-Type: application/json
-
-{
-  "name": "Alice Clone",
-  "email": "alice@example.com"
-}
-
-### Test duplicate email case-insensitive
-POST http://localhost:3000/api/users
-Content-Type: application/json
-
-{
-  "name": "Bob Clone",
-  "email": "BOB@EXAMPLE.COM"
 }
 
 ### Get all users
