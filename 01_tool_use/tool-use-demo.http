@@ -1,0 +1,193 @@
+# ============================================================
+# D1: Tool Use Under the Hood
+# ============================================================
+# This demo shows the difference between LLMs with and without tools.
+# Run each part in order. See demo-script.md for talking points.
+#
+# Prerequisites:
+#   - VS Code with REST Client extension
+#   - OPENAI_API_KEY in .env file
+# ============================================================
+
+@openai-key={{$dotenv OPENAI_API_KEY}}
+@model=gpt-5.4
+
+# ============================================================
+# PART 1: Without Tools — the model can only guess
+# ============================================================
+# TALKING POINT: This is a raw API call. No tools, no agent
+# framework. The model can only predict tokens. Watch what
+# comes back when we ask about something it can't know.
+# ============================================================
+
+### Part 1: LLM without tools
+POST https://api.openai.com/v1/chat/completions
+Content-Type: application/json
+Authorization: Bearer {{openai-key}}
+
+{
+  "model": "{{model}}",
+  "messages": [
+    {
+      "role": "user",
+      "content": "What's the current weather like in San Francisco? I need the temperature and conditions."
+    }
+  ]
+}
+
+# ============================================================
+# PART 2: With a tool definition — the model asks for help
+# ============================================================
+# TALKING POINT: Same question, same model. We only added a
+# tool definition — a JSON schema. Watch how the response
+# changes from text to a structured tool_call.
+# ============================================================
+
+### Part 2: LLM with tool definition
+POST https://api.openai.com/v1/chat/completions
+Content-Type: application/json
+Authorization: Bearer {{openai-key}}
+
+{
+  "model": "{{model}}",
+  "messages": [
+    {
+      "role": "user",
+      "content": "What's the current weather like in San Francisco? I need the temperature and conditions."
+    }
+  ],
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "get_weather",
+        "description": "Get current weather information for a specified city",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "city": {
+              "type": "string",
+              "description": "The city name, e.g. San Francisco"
+            },
+            "units": {
+              "type": "string",
+              "enum": ["celsius", "fahrenheit"],
+              "description": "Temperature units"
+            }
+          },
+          "required": ["city"]
+        }
+      }
+    }
+  ],
+  "tool_choice": "auto"
+}
+
+# ============================================================
+# PART 3: Complete the loop — feed tool results back
+# ============================================================
+# TALKING POINT: In a real agent, something would call the
+# weather API. We simulate it with mock data. The model takes
+# the raw JSON and produces a grounded, natural response.
+#
+# This is the full agent loop in miniature:
+#   1. User asks a question
+#   2. Model requests a tool call (assistant role, tool_calls)
+#   3. Something executes the tool (tool role, result)
+#   4. Model uses the result to answer
+# ============================================================
+
+### Part 3: Send tool results back
+POST https://api.openai.com/v1/chat/completions
+Content-Type: application/json
+Authorization: Bearer {{openai-key}}
+
+{
+  "model": "{{model}}",
+  "messages": [
+    {
+      "role": "user",
+      "content": "What's the current weather like in San Francisco? I need the temperature and conditions."
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "call_abc123",
+          "type": "function",
+          "function": {
+            "name": "get_weather",
+            "arguments": "{\"city\": \"San Francisco\", \"units\": \"fahrenheit\"}"
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_abc123",
+      "content": "{\"location\": \"San Francisco, CA\", \"temperature\": 68, \"condition\": \"partly cloudy\", \"humidity\": 72, \"wind_speed\": 12}"
+    }
+  ]
+}
+
+# ============================================================
+# PART 4: Add a system prompt — steer tone and persona
+# ============================================================
+# TALKING POINT: Same question, same tool result. The only
+# thing we changed is a new message with role "system" at the
+# top of the conversation. System prompts set the ground rules
+# for the model — persona, tone, format, constraints — before
+# the user ever says anything. This is the simplest form of
+# context engineering: you're not changing the model, you're
+# changing the context it reasons over.
+# ============================================================
+
+### Part 4: Same loop, with a system prompt
+POST https://api.openai.com/v1/chat/completions
+Content-Type: application/json
+Authorization: Bearer {{openai-key}}
+
+{
+  "model": "{{model}}",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a dramatic 19th-century sea captain. Report all weather as if it directly threatens your ship. Use nautical language and be theatrical. Keep responses to 2-3 sentences."
+    },
+    {
+      "role": "user",
+      "content": "What's the current weather like in San Francisco? I need the temperature and conditions."
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "call_abc123",
+          "type": "function",
+          "function": {
+            "name": "get_weather",
+            "arguments": "{\"city\": \"San Francisco\", \"units\": \"fahrenheit\"}"
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_abc123",
+      "content": "{\"location\": \"San Francisco, CA\", \"temperature\": 68, \"condition\": \"partly cloudy\", \"humidity\": 72, \"wind_speed\": 12}"
+    }
+  ]
+}
+
+# ============================================================
+# DEBRIEF
+# ============================================================
+# "The model didn't learn about weather. We gave it a tool,
+# it decided to use it, we executed the tool, and fed the
+# result back. That loop — observe, decide, act, evaluate —
+# is the foundation of every agent. Claude Code, Copilot,
+# Cursor — they're all running this loop with more tools
+# and more iterations."
+# ============================================================
