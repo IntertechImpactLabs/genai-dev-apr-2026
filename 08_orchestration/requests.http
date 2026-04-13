@@ -1,0 +1,16 @@
+@baseUrl = http://localhost:3000
+
+### Get all users
+GET {{baseUrl}}/users
+
+### Get user by ID
+GET {{baseUrl}}/users/1
+
+### Create a user
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+  "name": "Alice",
+  "email": "alice@example.com"
+}
