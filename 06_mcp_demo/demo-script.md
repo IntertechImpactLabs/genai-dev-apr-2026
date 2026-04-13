@@ -45,15 +45,32 @@ npm install
 **What to do:** Show the VS Code MCP config:
 
 ```json
-// .vscode/mcp.json
+// .vscode/mcp.json - GitHub Copilot
 {
-  "servers": {
+    "servers": {
+        "project-docs": {
+            "type": "stdio",
+            "command": "node",
+            "args": [
+                "server.js"
+            ],
+            "env": {
+                "DOCS_DIR": "docs"
+            }
+        }
+    }
+}
+```
+
+```json
+// .mcp.json - Claude Code
+{
+  "mcpServers": {
     "project-docs": {
-      "type": "stdio",
       "command": "node",
-      "args": ["exercises/07_mcp_demo/server.js"],
+      "args": ["server.js"],
       "env": {
-        "DOCS_DIR": "exercises/07_mcp_demo/docs"
+        "DOCS_DIR": "docs"
       }
     }
   }

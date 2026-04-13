@@ -22,7 +22,7 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import { readFileSync, readdirSync, existsSync } from "fs";
+import { existsSync, readFileSync, readdirSync } from "fs";
 import { join, relative } from "path";
 
 // --- Configuration ---
@@ -54,7 +54,6 @@ const server = new Server(
   { name: "project-docs", version: "1.0.0" },
   { capabilities: { tools: {} } }
 );
-
 // --- Tool definitions ---
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: [

@@ -23,26 +23,39 @@ A project documentation server that lets agents search and read your team's docs
 npm install
 ```
 
-### Connect to Copilot
+### Connect to Copilot or Claude
 
-Add to `.vscode/mcp.json`:
 ```json
+// .vscode/mcp.json - GitHub Copilot
 {
-  "servers": {
-    "project-docs": {
-      "type": "stdio",
-      "command": "node",
-      "args": ["exercises/07_mcp_demo/server.js"],
-      "env": { "DOCS_DIR": "exercises/07_mcp_demo/docs" }
+    "servers": {
+        "project-docs": {
+            "type": "stdio",
+            "command": "node",
+            "args": [
+                "server.js"
+            ],
+            "env": {
+                "DOCS_DIR": "docs"
+            }
+        }
     }
-  }
 }
 ```
 
-### Connect to Claude Code
-
-```bash
-claude mcp add project-docs -- node exercises/07_mcp_demo/server.js
+```json
+// .mcp.json - Claude Code
+{
+  "mcpServers": {
+    "project-docs": {
+      "command": "node",
+      "args": ["server.js"],
+      "env": {
+        "DOCS_DIR": "docs"
+      }
+    }
+  }
+}
 ```
 
 ## Key teaching moments
