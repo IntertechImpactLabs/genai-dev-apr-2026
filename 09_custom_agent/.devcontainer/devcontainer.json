@@ -1,0 +1,33 @@
+{
+  "name": "D1: Tool Use Under the Hood",
+  "build": {
+    "dockerfile": "../../.devcontainer-base/Dockerfile",
+    "context": "../../.devcontainer-base"
+  },
+  "workspaceFolder": "/workspaces/09_custom_agent",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/09_custom_agent,type=bind,consistency=cached",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "humao.rest-client",
+        "dbaeumer.vscode-eslint",
+        "ms-toolsai.jupyter",
+        "Anthropic.claude-code"
+      ]
+    }
+  },
+  "mounts": [],
+  "runArgs": [
+    "--hostname",
+    "demo-09-custom-agent",
+    "--env-file",
+    "${localWorkspaceFolder}/../.env"
+  ],
+  "postCreateCommand": "pip install --break-system-packages -r requirements.txt",
+  "features": {
+    "ghcr.io/devcontainers/features/python:1": {
+      "installTools": true,
+      "version": "os-provided"
+    }
+  }
+}
