@@ -9,7 +9,7 @@ Agents aren't magic — they run a visible loop of observe → plan → act → 
 ## Prerequisites
 
 - Claude Code installed (preferred — the agent loop is most visible in terminal output) or VS Code with Copilot agent mode
-- This project set up: `cd exercises/06_refactoring && npm install && npm run init-db`
+- This project set up: `npm install && npm run init-db`
 - Server should NOT be running (the agent will start it if needed)
 
 ## Setup slide talking points
@@ -18,7 +18,7 @@ Agents aren't magic — they run a visible loop of observe → plan → act → 
 
 ## The codebase
 
-The `06_refactoring/` project is an Express.js app with intentional anti-patterns:
+This project is an Express.js app with intentional anti-patterns:
 - Database queries scattered across route handlers
 - Each route file creates its own database connection
 - SQL mixed with business logic
@@ -120,6 +120,6 @@ If the agent is slow or produces unexpected output:
 This demo and D6 (Plan vs. No Plan) both use the same codebase. Make sure to reset the project between demos:
 
 ```bash
-git checkout -- exercises/06_refactoring/
+git checkout -- .
 npm run init-db
 ```
