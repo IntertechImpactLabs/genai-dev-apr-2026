@@ -16,6 +16,14 @@
             "program": "${workspaceFolder}/agent_openai.py",
             "console": "integratedTerminal",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "name": "Run Agent (OpenAI Advanced)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/agent_openai_advanced.py",
+            "console": "integratedTerminal",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }
