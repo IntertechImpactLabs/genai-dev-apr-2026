@@ -10,7 +10,7 @@
 # ============================================================
 
 @openai-key={{$processEnv OPENAI_API_KEY}}
-@model=gpt-5.4
+@model=gpt-5.6-sol
 
 # ============================================================
 # PART 1: Without Tools — the model can only guess
@@ -35,6 +35,21 @@ Authorization: Bearer {{openai-key}}
   ]
 }
 
+### Knowledge cutoff date
+POST https://api.openai.com/v1/chat/completions
+Content-Type: application/json
+Authorization: Bearer {{openai-key}}
+
+{
+  "model": "{{model}}",
+  "messages": [
+    {
+      "role": "user",
+      "content": "What is your knowledge cutoff date?"
+    }
+  ]
+}
+
 # ============================================================
 # PART 2: With a tool definition — the model asks for help
 # ============================================================
@@ -50,6 +65,7 @@ Authorization: Bearer {{openai-key}}
 
 {
   "model": "{{model}}",
+  "reasoning_effort": "none",
   "messages": [
     {
       "role": "user",
@@ -104,6 +120,7 @@ Authorization: Bearer {{openai-key}}
 
 {
   "model": "{{model}}",
+  "reasoning_effort": "none",
   "tools": [
     {
       "type": "function",
@@ -175,6 +192,7 @@ Authorization: Bearer {{openai-key}}
 
 {
   "model": "{{model}}",
+  "reasoning_effort": "none",
   "tools": [
     {
       "type": "function",
