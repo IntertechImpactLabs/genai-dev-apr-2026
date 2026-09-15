@@ -49,7 +49,7 @@ async def main():
                     args = json.dumps(block.input, indent=2) if block.input else ""
                     print(f"\n[Tool: {block.name}]\n{args}")
                 elif isinstance(block, TextBlock):
-                    print(block.text)
+                    print(f"\n[Agent Response]\n{block.text}")
 
         elif isinstance(message, UserMessage):
             # Tool results stream back as UserMessages
@@ -58,7 +58,7 @@ async def main():
                     if isinstance(block, ToolResultBlock):
                         preview = str(block.content or "")[:300]
                         status = "error" if block.is_error else "ok"
-                        print(f"\n[Result ({status})]\n{preview}")
+                        print(f"\n[Tool Result ({status})]\n{preview}")
 
         elif isinstance(message, ResultMessage):
             print(f"\n--- Agent finished ({message.subtype}) ---")

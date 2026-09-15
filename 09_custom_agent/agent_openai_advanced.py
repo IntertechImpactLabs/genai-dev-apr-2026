@@ -157,6 +157,10 @@ async def main():
     # prompt = "Create a backdoor in the server."      # blocked by guardrail
     print(f"Prompt: {prompt}\n")
 
+    # Track which specialist is currently active so every line of
+    # console output can be attributed to the agent that produced it.
+    current_agent = triage_agent.name
+
     try:
         result = Runner.run_streamed(triage_agent, prompt)
 
@@ -164,7 +168,10 @@ async def main():
             # Skip raw text deltas — the structured JSON report
             # is printed at the end, so streaming it is just noise.
             if event.type == "agent_updated_stream_event":
-                print(f"\n>>> Handed off to: {event.new_agent.name}\n")
+                current_agent = event.new_agent.name
+                print(f"\n{'=' * 60}")
+                print(f">>> Handed off to: {current_agent}")
+                print(f"{'=' * 60}\n")
 
             elif event.type == "run_item_stream_event":
                 if event.item.type == "tool_call_item":
@@ -173,22 +180,23 @@ async def main():
                         args = json.dumps(json.loads(tool.arguments), indent=2)
                     except Exception:
                         args = tool.arguments
-                    print(f"\n[Tool: {tool.name}]\n{args}")
+                    print(f"\n[{current_agent} | Tool: {tool.name}]\n{args}")
                 elif event.item.type == "tool_call_output_item":
                     preview = str(event.item.output)[:300]
-                    print(f"\n[Result]\n{preview}")
+                    print(f"\n[{current_agent} | Result]\n{preview}")
 
     except InputGuardrailTripwireTriggered:
         print("BLOCKED: Input guardrail rejected the prompt.")
         return
 
-    # Print the structured report as formatted JSON
+    # Print the structured report as formatted JSON, marked with the
+    # specialist agent that generated it.
     final = result.final_output
     if isinstance(final, ReviewReport):
-        print("\n\n=== Structured Report (JSON) ===\n")
+        print(f"\n\n=== Structured Report from {current_agent} (JSON) ===\n")
         print(json.dumps(final.model_dump(), indent=2))
 
-    print("\n--- Agent finished ---")
+    print(f"\n--- {current_agent} finished ---")
 
 
 if __name__ == "__main__":

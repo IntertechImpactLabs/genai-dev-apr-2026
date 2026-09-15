@@ -48,13 +48,20 @@ async def main():
         "Review the server code for security issues and bugs."
     )
 
+    responding = False  # Track whether we've marked the current text response
+
     async for event in result.stream_events():
         if isinstance(event, RawResponsesStreamEvent):
             # Stream text tokens as they arrive
             data = event.data
             if data.type == "response.output_text.delta":
+                if not responding:
+                    # Mark the start of an agent text response
+                    print("\n[Agent Response]")
+                    responding = True
                 print(data.delta, end="", flush=True)
         elif isinstance(event, RunItemStreamEvent):
+            responding = False  # A tool step ends the current text response
             if event.name == "tool_called":
                 tool = event.item.raw_item
                 try:
@@ -64,7 +71,7 @@ async def main():
                 print(f"\n[Tool: {tool.name}]\n{args}")
             elif event.name == "tool_output":
                 preview = str(event.item.output)[:300]
-                print(f"\n[Result]\n{preview}")
+                print(f"\n[Tool Result]\n{preview}")
 
     print("\n--- Agent finished ---")
 
