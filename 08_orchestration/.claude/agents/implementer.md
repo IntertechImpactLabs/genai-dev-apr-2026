@@ -1,6 +1,6 @@
 ---
 name: implementer
-description: Use this agent when you need to write or modify TypeScript/Express application code — new routes, middleware, database queries, or utility functions. Do not use for writing tests or updating documentation.
+description: ALWAYS use this agent to write or modify TypeScript/Express application source files (.ts files in src/) — new routes, middleware, database queries, or utility functions. Invoke proactively as soon as a task requires creating or editing application code. Do not use for writing tests or updating documentation.
 tools:
   - Read
   - Write
