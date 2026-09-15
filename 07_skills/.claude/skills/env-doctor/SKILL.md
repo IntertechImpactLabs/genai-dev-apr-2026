@@ -9,9 +9,15 @@ Diagnose and explain local development environment problems for a new or returni
 
 ## Step 1: Run the checks
 
+Run the `check-env.sh` script that ships with this skill. It lives next to this file at `scripts/check-env.sh` inside the skill's base directory (provided in the skill invocation preamble as "Base directory for this skill: ...").
+
+Invoke it with the skill's base directory, not the user's cwd:
+
 ```
-scripts/check-env.sh
+"$CLAUDE_SKILL_DIR/scripts/check-env.sh"
 ```
+
+If `$CLAUDE_SKILL_DIR` is not set in your environment, substitute the literal base directory path from the invocation preamble (e.g. `/absolute/path/to/.claude/skills/env-doctor/scripts/check-env.sh`). Do not run `./scripts/check-env.sh` — the working directory is the user's project, not the skill directory, and the script will not be found there.
 
 The script checks runtime versions, required environment variables, and local setup state. Each line is prefixed with a status tag: `OK`, `MISSING`, `WARN`, or `DEFAULT`.
 
